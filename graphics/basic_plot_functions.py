@@ -244,6 +244,20 @@ def plotDistri(lats,lons,values,
     ofile = f'distri_{VarName}_{out_name}_{levbin}.png'
     plt.savefig(ofile,dpi=200,bbox_inches='tight')
     print(ofile)
+
+    # save figure data as yaml
+    figureData = {
+        'ObsType': str(ObsType),
+        'VarName': str(VarName),
+        'varUnit': str(var_unit),
+        'lats': pu.dataYAMLFmtArray(lats[finite]),
+        'lons': pu.dataYAMLFmtArray(lons[finite]),
+        'values': pu.dataYAMLFmtArray(values[finite]),
+    }
+    figureYAML = pu.yaml_dump_figure_data(figureData)
+    with open(ofile.replace('.png', '.yaml'), 'w') as file:
+        file.write(figureYAML)
+
     plt.close()
 
 

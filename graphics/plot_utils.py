@@ -89,16 +89,21 @@ def dataYAMLFmtArray(arr):
 class _NumpySafeYAMLDumper(yaml.SafeDumper):
     '''
     yaml.SafeDumper that also knows how to represent any numpy scalar
-    (np.str_, np.bool_, np.integer, np.floating, etc.), converting it to
-    its native Python equivalent via .item(). Guards against stray numpy
-    scalars (e.g. varName/binVal strings pulled from a pandas/numpy
-    source) reaching yaml.safe_dump unconverted.
+    (np.str_, np.bool_, np.integer, np.floating, etc.) or numpy array,
+    converting each to its native Python equivalent via .item()/.tolist().
+    Guards against stray numpy types (e.g. a raw ndarray or a scalar
+    pulled from a pandas/numpy source) reaching yaml.dump unconverted,
+    regardless of which field in figureData they end up in.
     '''
 
 def _represent_numpy_generic(dumper, data):
     return dumper.represent_data(data.item())
 
+def _represent_numpy_ndarray(dumper, data):
+    return dumper.represent_data(data.tolist())
+
 _NumpySafeYAMLDumper.add_multi_representer(np.generic, _represent_numpy_generic)
+_NumpySafeYAMLDumper.add_multi_representer(np.ndarray, _represent_numpy_ndarray)
 
 def yaml_dump_figure_data(figureData):
     '''
